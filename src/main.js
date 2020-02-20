@@ -1,22 +1,38 @@
+/**
+ * Class to load HireWho jobs in a div for specific business
+ */
 class HireWhoPlugin {
+    /**
+     * Initiate plugin
+     * @param {object} conf - contains business slug and optional HTML container ID
+     */
     constructor(conf) {
+        // validate
         if (!conf) throw Error("HireWhoPlugin conf not available");
         if (!conf.slug) throw Error("The business slug is needed for HireWho Plugin to load.");
         if (!conf.container) container = "hirewho-plugin";
+        // set shared variables
         this.slug = conf.slug;
         this.container = document.getElementById(container);
         this.title = conf.title || "Job openings";
     }
 
+    /**
+     * Main function to call to load jobs in a div
+     */
     load() {
         const url = `https://hirewho.co/api/job/?slug=${this.slug}&publish=1`;
         fetch(url)
             .then(response => response.json())
-            .then(data => this.process(data));
-        this.insertStyles();
+            .then(data => this._process(data));
+        this._insertStyles();
     }
 
-    process(jobs) {
+    /**
+     * Process jobs to show them on webpage
+     * @param {array} jobs - public jobs fetched from API
+     */
+    _process(jobs) {
         if (!jobs.length) return;
         let html = `<div id="hirewho-jobs">`;
         html += `<h3>${this.title}</h3>`;
@@ -38,7 +54,10 @@ class HireWhoPlugin {
         this.container.innerHTML = html;
     }
 
-    insertStyles() {
+    /**
+     * Insert CSS styles
+     */
+    _insertStyles() {
         const style = document.createElement("style");
         style.appendChild(document.createTextNode(""));
         document.head.appendChild(style);
@@ -106,5 +125,6 @@ class HireWhoPlugin {
     }
 }
 
+// Fire plugin
 const e = new HireWhoPlugin(window.hirewhoConf);
 e.load();
