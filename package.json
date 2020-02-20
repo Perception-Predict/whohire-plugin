@@ -1,0 +1,11 @@
+{
+  "name": "hirewho-plugin",
+  "version": "1.0.0",
+  "main": "src/index.html",
+  "author": "Manvir <mail@manvir.me>",
+  "private": true,
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/main.js"
+  }
+}

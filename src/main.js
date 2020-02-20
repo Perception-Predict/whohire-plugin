@@ -6,5 +6,7 @@ class HireWhoPlugin {
         this.container = document.getElementById(container);
     }
 
-    load() {}
+    load() {
+        this.container.innerHTML = "<p>This is loaded via plugin</p>";
+    }
 }
