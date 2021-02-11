@@ -8,13 +8,19 @@ class HireWhoPlugin {
      */
     constructor(conf) {
         // validate
-        if (!conf) throw Error("HireWhoPlugin conf not available");
-        if (!conf.slug) throw Error("The business slug is needed for HireWho Plugin to load.");
-        if (!conf.container) container = "hirewho-plugin";
-        // set shared variables
-        this.slug = conf.slug;
-        this.container = document.getElementById(container);
-        this.title = conf.title || "Job openings";
+        if (!!conf) {
+            if (!conf) throw Error("HireWhoPlugin conf not available");
+            if (!conf.slug) throw Error("The business slug is needed for HireWho Plugin to load.");
+            if (!conf.container) container = "hirewho-plugin";
+            // set shared variables
+            this.slug = conf.slug;
+            this.container = document.getElementById(container);
+            this.title = conf.title || "Job openings";
+        } else {
+            this.container = document.getElementById("hirewho-plugin");
+            this.slug = this.container.getAttribute("data-slug");
+            this.title = this.container.getAttribute("data-title") || "Job openings";
+        }
     }
 
     /**
@@ -23,8 +29,8 @@ class HireWhoPlugin {
     load() {
         const url = `https://hirewho.co/api/job/?slug=${this.slug}&publish=1`;
         fetch(url)
-            .then(response => response.json())
-            .then(data => this._process(data));
+            .then((response) => response.json())
+            .then((data) => this._process(data));
         this._insertStyles();
     }
 
@@ -126,5 +132,4 @@ class HireWhoPlugin {
 }
 
 // Fire plugin
-const e = new HireWhoPlugin(window.hirewhoConf);
-e.load();
+new HireWhoPlugin(window.hirewhoConf).load();
