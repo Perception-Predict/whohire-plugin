@@ -27,7 +27,7 @@ class HireWhoPlugin {
      * Main function to call to load jobs in a div
      */
     load() {
-        const url = `https://api.whohire.com/api/job/?slug=${this.slug}&publish=1`;
+        const url = `https://backend.whohire.com/api/job/?slug=${this.slug}&publish=1`;
         fetch(url)
             .then((response) => response.json())
             .then((data) => this._process(data));
@@ -44,7 +44,7 @@ class HireWhoPlugin {
         html += `<h3>${this.title}</h3>`;
         for (let i = 0; i < jobs.length; i++) {
             const job = jobs[i];
-            const url = `https://api.whohire.com/job/${this.slug}/${job.id}`;
+            const url = `https://backend.whohire.com/job/${this.slug}/${job.id}`;
             html += `<div class="hirewho-job">`;
             html += `  <div>`;
             html += `    <div class="job-title">${job.title}</div>`;
