@@ -1,16 +1,16 @@
-# HireWho Web Plugin
-This plugin is to render HireWho Jobs for a business on their own websites.
+# WhoHire Web Plugin
+This plugin is to render WhoHire Jobs for a business on their own websites.
 
 ## How it works
 The user needs to place the following code in this site to make this work.
 ```
-<div id="hirewho-plugin"></div>
+<div id="whohire-plugin"></div>
 <script>
     const hirewhoConf = {
         'slug': 'ccclean'
     }
 </script>
-<script src="https://hirewho.co/static/plugin.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Perception-Predict/whohire-plugin@master/src/main.js"></script>
 ```
 
 ### Specifying a custom div to load jobs
