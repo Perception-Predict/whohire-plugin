@@ -30,7 +30,7 @@ class HireWhoPlugin {
    * Main function to call to load jobs in a div
    */
   load() {
-    const url = `https://app.whohire.com/api/job/?slug=${this.slug}&publish=1`;
+    const url = `https://api.whohire.com/api/job/?slug=${this.slug}&publish=1`;
     fetch(url)
       .then((response) => response.json())
       .then((data) => this._process(data));
