@@ -47,7 +47,7 @@ class HireWhoPlugin {
     html += `<h3>${this.title}</h3>`;
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
-      const url = `https://app.whohire.com/job/${this.slug}/${job.id}`;
+      const url = `https://testing.whohire.com/job/${this.slug}/${job.id}`;
       html += `<div class="hirewho-job">`;
       html += `  <div>`;
       html += `    <div class="job-title">${job.title}</div>`;
