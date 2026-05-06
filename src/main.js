@@ -41,15 +41,18 @@ class HireWhoPlugin {
     _process(jobs) {
         if (!jobs.length) return;
         let html = `<div id="hirewho-jobs">`;
-        html += `<h3>${this.title}</h3>`;
+        html += `<h3>${this.title}</h3>`; 
         for (let i = 0; i < jobs.length; i++) {
             const job = jobs[i];
+            const isRemote = job?.remote_type?.toLowerCase().includes("fully remote");
             const url = `https://testing.whohire.com/job/${this.slug}/${job.id}`;
             html += `<div class="hirewho-job">`;
             html += `  <div>`;
             html += `    <div class="job-title">${job.title}</div>`;
             html += `    <div class="job-position">${job.position}</div>`;
-            html += `    <div class="job-location">${job.city}, ${job.state}</div>`;
+            html += isRemote
+            ? `<div class="job-location">Remote</div>`
+            : `<div class="job-location">${job.city}, ${job.state}</div>`;
             html += `  </div>`;
             html += `  <div>`;
             html += `    <a href="${url}" target="_blank">View job</a>`;
