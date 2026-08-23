@@ -1,3 +1,11 @@
+// WH-4145: default campaign tagging for links rendered by the embedded
+// careers-page plugin, so those applications are separable from direct
+// traffic in the source reports. Overridable per install via `utmSource` /
+// `utmMedium` / `utmCampaign` in the conf object, or the matching
+// `data-utm-*` attributes on the container element.
+const DEFAULT_UTM_SOURCE = "careers_page";
+const DEFAULT_UTM_MEDIUM = "embed";
+
 /**
  * Class to load HireWho jobs in a div for specific business
  */
@@ -20,10 +28,36 @@ class HireWhoPlugin {
       this.slug = conf.slug;
       this.title = conf.title || "Job openings";
       this.container = document.getElementById(conf.container);
+      this.utmSource = conf.utmSource || DEFAULT_UTM_SOURCE;
+      this.utmMedium = conf.utmMedium || DEFAULT_UTM_MEDIUM;
+      this.utmCampaign = conf.utmCampaign || null;
     } else {
       this.slug = this.container.getAttribute("data-slug");
       this.title = this.container.getAttribute("data-title") || "Job openings";
+      this.utmSource =
+        this.container.getAttribute("data-utm-source") || DEFAULT_UTM_SOURCE;
+      this.utmMedium =
+        this.container.getAttribute("data-utm-medium") || DEFAULT_UTM_MEDIUM;
+      this.utmCampaign = this.container.getAttribute("data-utm-campaign");
     }
+  }
+
+  /**
+   * Campaign parameters appended to every job link this plugin renders.
+   *
+   * Without these, an application that came through a customer's embedded
+   * careers page is indistinguishable from someone who typed the URL in --
+   * both land as plain direct traffic. WH-4145.
+   *
+   * @returns {string} a query string beginning with "?", never empty
+   */
+  _utmQuery() {
+    const params = new URLSearchParams({
+      utm_source: this.utmSource,
+      utm_medium: this.utmMedium,
+    });
+    if (this.utmCampaign) params.set("utm_campaign", this.utmCampaign);
+    return `?${params.toString()}`;
   }
 
   /**
@@ -47,7 +81,7 @@ class HireWhoPlugin {
     html += `<h3>${this.title}</h3>`;
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
-      const url = `https://app.whohire.com/job/${this.slug}/${job.id}`;
+      const url = `https://app.whohire.com/job/${this.slug}/${job.id}${this._utmQuery()}`;
       html += `<div class="hirewho-job">`;
       html += `  <div>`;
       html += `    <div class="job-title">${job.title}</div>`;
