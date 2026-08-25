@@ -6,6 +6,19 @@
 const DEFAULT_UTM_SOURCE = "careers_page";
 const DEFAULT_UTM_MEDIUM = "embed";
 
+// The five campaign parameters the backend stores, with the conf key and the
+// container attribute each is read from. Listed once so adding a parameter
+// later is one row rather than three edits -- source and medium carry a
+// default because embedded traffic is worth separating from direct even when
+// nobody configures anything.
+const UTM_PARAMS = [
+  { name: "utm_source", conf: "utmSource", attr: "data-utm-source", fallback: DEFAULT_UTM_SOURCE },
+  { name: "utm_medium", conf: "utmMedium", attr: "data-utm-medium", fallback: DEFAULT_UTM_MEDIUM },
+  { name: "utm_campaign", conf: "utmCampaign", attr: "data-utm-campaign", fallback: null },
+  { name: "utm_term", conf: "utmTerm", attr: "data-utm-term", fallback: null },
+  { name: "utm_content", conf: "utmContent", attr: "data-utm-content", fallback: null },
+];
+
 /**
  * Class to load HireWho jobs in a div for specific business
  */
@@ -28,17 +41,17 @@ class HireWhoPlugin {
       this.slug = conf.slug;
       this.title = conf.title || "Job openings";
       this.container = document.getElementById(conf.container);
-      this.utmSource = conf.utmSource || DEFAULT_UTM_SOURCE;
-      this.utmMedium = conf.utmMedium || DEFAULT_UTM_MEDIUM;
-      this.utmCampaign = conf.utmCampaign || null;
+      this.utm = {};
+      UTM_PARAMS.forEach((p) => {
+        this.utm[p.name] = conf[p.conf] || p.fallback;
+      });
     } else {
       this.slug = this.container.getAttribute("data-slug");
       this.title = this.container.getAttribute("data-title") || "Job openings";
-      this.utmSource =
-        this.container.getAttribute("data-utm-source") || DEFAULT_UTM_SOURCE;
-      this.utmMedium =
-        this.container.getAttribute("data-utm-medium") || DEFAULT_UTM_MEDIUM;
-      this.utmCampaign = this.container.getAttribute("data-utm-campaign");
+      this.utm = {};
+      UTM_PARAMS.forEach((p) => {
+        this.utm[p.name] = this.container.getAttribute(p.attr) || p.fallback;
+      });
     }
   }
 
@@ -52,12 +65,13 @@ class HireWhoPlugin {
    * @returns {string} a query string beginning with "?", never empty
    */
   _utmQuery() {
-    const params = new URLSearchParams({
-      utm_source: this.utmSource,
-      utm_medium: this.utmMedium,
+    const params = new URLSearchParams();
+    UTM_PARAMS.forEach((p) => {
+      const value = this.utm[p.name];
+      if (value) params.set(p.name, value);
     });
-    if (this.utmCampaign) params.set("utm_campaign", this.utmCampaign);
-    return `?${params.toString()}`;
+    const query = params.toString();
+    return query ? `?${query}` : "";
   }
 
   /**
