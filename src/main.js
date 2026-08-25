@@ -1,3 +1,24 @@
+// WH-4145: default campaign tagging for links rendered by the embedded
+// careers-page plugin, so those applications are separable from direct
+// traffic in the source reports. Overridable per install via `utmSource` /
+// `utmMedium` / `utmCampaign` in the conf object, or the matching
+// `data-utm-*` attributes on the container element.
+const DEFAULT_UTM_SOURCE = "careers_page";
+const DEFAULT_UTM_MEDIUM = "embed";
+
+// The five campaign parameters the backend stores, with the conf key and the
+// container attribute each is read from. Listed once so adding a parameter
+// later is one row rather than three edits -- source and medium carry a
+// default because embedded traffic is worth separating from direct even when
+// nobody configures anything.
+const UTM_PARAMS = [
+  { name: "utm_source", conf: "utmSource", attr: "data-utm-source", fallback: DEFAULT_UTM_SOURCE },
+  { name: "utm_medium", conf: "utmMedium", attr: "data-utm-medium", fallback: DEFAULT_UTM_MEDIUM },
+  { name: "utm_campaign", conf: "utmCampaign", attr: "data-utm-campaign", fallback: null },
+  { name: "utm_term", conf: "utmTerm", attr: "data-utm-term", fallback: null },
+  { name: "utm_content", conf: "utmContent", attr: "data-utm-content", fallback: null },
+];
+
 /**
  * Class to load HireWho jobs in a div for specific business
  */
@@ -20,10 +41,37 @@ class HireWhoPlugin {
       this.slug = conf.slug;
       this.title = conf.title || "Job openings";
       this.container = document.getElementById(conf.container);
+      this.utm = {};
+      UTM_PARAMS.forEach((p) => {
+        this.utm[p.name] = conf[p.conf] || p.fallback;
+      });
     } else {
       this.slug = this.container.getAttribute("data-slug");
       this.title = this.container.getAttribute("data-title") || "Job openings";
+      this.utm = {};
+      UTM_PARAMS.forEach((p) => {
+        this.utm[p.name] = this.container.getAttribute(p.attr) || p.fallback;
+      });
     }
+  }
+
+  /**
+   * Campaign parameters appended to every job link this plugin renders.
+   *
+   * Without these, an application that came through a customer's embedded
+   * careers page is indistinguishable from someone who typed the URL in --
+   * both land as plain direct traffic. WH-4145.
+   *
+   * @returns {string} a query string beginning with "?", never empty
+   */
+  _utmQuery() {
+    const params = new URLSearchParams();
+    UTM_PARAMS.forEach((p) => {
+      const value = this.utm[p.name];
+      if (value) params.set(p.name, value);
+    });
+    const query = params.toString();
+    return query ? `?${query}` : "";
   }
 
   /**
@@ -47,7 +95,7 @@ class HireWhoPlugin {
     html += `<h3>${this.title}</h3>`;
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i];
-      const url = `https://app.whohire.com/job/${this.slug}/${job.id}`;
+      const url = `https://app.whohire.com/job/${this.slug}/${job.id}${this._utmQuery()}`;
       html += `<div class="hirewho-job">`;
       html += `  <div>`;
       html += `    <div class="job-title">${job.title}</div>`;
